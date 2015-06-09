@@ -34,6 +34,8 @@ namespace ShinKen
         private int zoom = 0;
         public bool WikiActive = false;
         public bool MouseStart = false;
+        int ticker = 0;
+
         #endregion
         
         #region Disable TAB in webbrowser
@@ -89,7 +91,7 @@ namespace ShinKen
                 //this.PIC.pictureBox1.Image = CutImage(btm,range);
                 btm = CutImage(b, range);
                 b.Dispose();
-                btm.Save("C:\\1.jpeg", System.Drawing.Imaging.ImageFormat.Jpeg);
+                //btm.Save("C:\\1.jpeg", System.Drawing.Imaging.ImageFormat.Jpeg);
             }
         }
 
@@ -173,6 +175,14 @@ namespace ShinKen
         }
         #endregion
 
+        private void StartTime1()
+        {
+            this.time1 = new Timer();
+            this.time1.Interval = 300;
+            this.time1.Tick += new System.EventHandler(this.time1_Tick);
+            time1.Start();
+        }
+
         public ShinKen()
         {          
                         
@@ -196,9 +206,10 @@ namespace ShinKen
             k_hook.Start();
             //this.richTextBox1.Hide();
             
+            /*
             ProcessModule objCurrentModule = Process.GetCurrentProcess().MainModule; //Get Current Module
             objKeyboardProcess = new LowLevelKeyboardProc(captureKey); //Assign callback function each time keyboard process
-            ptrHook = SetWindowsHookEx(13, objKeyboardProcess, GetModuleHandle(objCurrentModule.ModuleName), 0); //Setting Hook of Keyboard Process for current module
+            ptrHook = SetWindowsHookEx(13, objKeyboardProcess, GetModuleHandle(objCurrentModule.ModuleName), 0); //Setting Hook of Keyboard Process for current module*/
 
             //this.webBrowser1.Location=new Point(-10000,1);
         }
@@ -227,16 +238,16 @@ namespace ShinKen
             {
                 this.Size = new Size(288 + 2 * WidthOfBar, 192 + WidthOfBar + HeightOfTitle);
             }
-            this.time1.Start();
+            StartTime1();
 
         }
 
         private void ShinKen_Load(object sender, EventArgs e)
         {
-            this.time1.Interval = 300;
-            this.time1.Tick += new System.EventHandler(this.time1_Tick);
-            this.time3.Interval = 15000;
+            
+            this.time3.Interval = 10000;
             this.time3.Tick += new System.EventHandler(this.time3_Tick);
+            time3.Start();
             if (MouseStart)
             {
                 time2.Start();
@@ -246,7 +257,18 @@ namespace ShinKen
 
         private void time3_Tick(object sender, EventArgs e)
         {
+            ticker++;
             ClearMemory();
+            if (ticker == 15)
+            {
+                ticker = 0;
+                this.time3.Dispose();
+                this.time3 = new Timer();
+                this.time3.Interval = 10000;
+                this.time3.Tick += new System.EventHandler(this.time3_Tick);
+                this.time3.Start();
+
+            }
         }
 
         /// <summary>
@@ -297,7 +319,9 @@ namespace ShinKen
             {
                 Snapshot(new Rectangle(this.Left + WidthOfBar, this.Top + HeightOfTitle, this.ClientRectangle.Width, this.ClientRectangle.Height));
                 if (this.WindowState == FormWindowState.Minimized) return;
-                top = 60;
+                if(zoom==0) top = 60;
+                if (zoom == 1) top = 36;
+                if (zoom == 2) top = 18;
                 for (i = 12; i <= this.ClientRectangle.Width-2; i++)
                     if ((btm.GetPixel(i, top + 10).R - btm.GetPixel(i + 1, top + 10).R > 150)
                         &&(btm.GetPixel(i, top + 20).R - btm.GetPixel(i + 1, top + 20).R > 150)
@@ -311,7 +335,7 @@ namespace ShinKen
                 if (left == 0) top = 0;
                 this.webBrowser1.Location = new Point(0 - left, 0 - top);
                 ticking = 0;
-                time1.Stop();
+                time1.Dispose();
             }
             //this.richTextBox1.Text = WidthOfBar.ToString() + "," + HeightOfTitle.ToString() + "," + this.Left.ToString() + "," + this.Top.ToString() ;
             #region test
@@ -410,7 +434,7 @@ namespace ShinKen
                         this.webBrowser1.Location = new Point(0, 0);
                         top = 0;
                         left = 0;
-                        time1.Start();
+                        StartTime1();
                         this.Height = (int)(640 * 1)+HeightOfTitle+WidthOfBar;
                         this.Width = (int)(960 * 1)+2*WidthOfBar;
                         this.Show();
@@ -423,7 +447,7 @@ namespace ShinKen
                             this.webBrowser1.Location = new Point(0, 0);
                             top = 0;
                             left = 0;
-                            time1.Start();
+                            StartTime1();
                             this.Height = (int)(640 * 0.6) + HeightOfTitle + WidthOfBar;
                             this.Width = (int)(960 * 0.6)+2 * WidthOfBar;
                             this.Show();
@@ -436,7 +460,7 @@ namespace ShinKen
                             this.webBrowser1.Location = new Point(0, 0);
                             top = 0;
                             left = 0;
-                            time1.Start();
+                            StartTime1();
                             this.Height = (int)(640 * 0.3) + HeightOfTitle + WidthOfBar;
                             this.Width = (int)(960 * 0.3) + 2 * WidthOfBar;
                             this.Show();
